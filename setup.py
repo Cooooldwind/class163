@@ -29,13 +29,13 @@ setup(
         "Programming Language :: Python :: 3.12",
     ],
     name="class163",
-    version="0.0.0",
-    description="NULL",
+    version="0.1.0",
+    description="",
     author="CooooldWind_",
     url="https://gitee.com/CooooldWind/class163",
     packages=find_packages(),
     install_requires=[
-        
+        "netease_encode_api",
     ],
     entry_points={
     },
