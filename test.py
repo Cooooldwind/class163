@@ -22,3 +22,5 @@ for i in u:
     t.append(time_b - time_f)
     pprint(m.sorted_info)
 print(t)
+
+# 网易易盾——推理拼图验证码参数逆向分析和调用_网易易盾 data参数-CSDN博客 https://blog.csdn.net/weixin_45307278/article/details/125472234
