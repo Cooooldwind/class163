@@ -29,7 +29,7 @@ setup(
         "Programming Language :: Python :: 3.12",
     ],
     name="class163",
-    version="0.1.0",
+    version="0.2.0",
     description="",
     author="CooooldWind_",
     url="https://gitee.com/CooooldWind/class163",
