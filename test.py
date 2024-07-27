@@ -3,8 +3,7 @@ from pprint import pprint
 from selenium import webdriver
 from class163.music import Music
 
-#  driver = webdriver.Safari() -> NoSuchDriverException
-driver = webdriver.Edge()
+driver = webdriver.ChromiumEdge()
 driver.get("https://music.163.com/#/login/")
 cookies = None
 while True:
@@ -18,4 +17,4 @@ while True:
 #  pprint(cookies)
 m = Music("https://music.163.com/song?id=1839931917")
 m.encode_session.set_cookies(cookies)
-pprint(m.get_file(level = "exhigh"))
+pprint(m.get("fld"))

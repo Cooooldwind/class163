@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.2.1
+Version: 0.2.2
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -25,13 +25,13 @@ class Music:
         self.title: str = None  #  标题
         self.subtitle: str = None  #  副标题
         self.album: str = None  #  专辑
-        self.artist: list[str] = None  #  歌手
+        self.artist: list[str] = []  #  歌手
         self.publish_time = None  #  发布时间（年月日）
         self.trans_title: str = None  #  标题译文
         self.trans_album: str = None  #  专辑译文
-        self.trans_artist: dict = None  #  歌手译文（需要用歌手原文作为键值）
-        self.detail_info_raw: dict = None  #  解码类返回的数据
-        self.detail_info_sorted: dict = None  #  整理后的数据
+        self.trans_artist: dict = {}  #  歌手译文（需要用歌手原文作为键值）
+        self.detail_info_raw: dict = {}  #  解码类返回的数据
+        self.detail_info_sorted: dict = {}  #  整理后的数据
         self.cover_url: str = None
         #  歌词相关
         self.__lyric_encode_data = {
@@ -43,8 +43,8 @@ class Music:
         self.trans_lyric: str = None  #  歌词翻译
         self.trans_uploader: str = None  #  翻译歌词的网易云用户昵称
         self.trans_lyric_uptime = None  #  翻译的发布时间（年月日）
-        self.lyric_info_raw: dict = None  #  解码类返回的数据
-        self.lyric_info_sorted: dict = None  #  整理后的数据
+        self.lyric_info_raw: dict = {}  #  解码类返回的数据
+        self.lyric_info_sorted: dict = {}  #  整理后的数据
         #  音乐文件相关
         """
         id表示歌曲的id号, 
@@ -60,19 +60,33 @@ class Music:
             "encodeType": None,  #  如果是lossless就用aac, 其他是mp3
             "csrf_token": "",
         }  #  解码时的encode_data
-        self.file_info_raw: dict = None
         self.file_url: str = None
         self.file_md5: str = None
         self.file_size: int = None
-        self.file_info_sorted: dict = None
+        self.file_info_raw: dict = {}  #  解码类返回的数据
+        self.file_info_sorted: dict = {}  #  整理后的数据
 
-    def get(self, type: str = "d", session: EncodeSession = None) -> dict:
+    def get(self, mode: str, session: EncodeSession = None) -> dict:
         if session is None:
             session = self.encode_session
-        if type == "d":
-            return self.get_detail(session=session)  #  详细信息
-        elif type == "l":
-            return self.get_lyric(session=session)  #  歌词
+        is_detail, is_lyric, is_file = False, False, False
+        if "d" in mode:
+            is_detail = True
+            mode = mode.replace("d","")
+        if "l" in mode:
+            is_lyric = True
+            mode = mode.replace("l","")
+        if "f" in mode:
+            is_file = True
+            mode = mode.replace("f","")
+        if len(mode) > 0: raise TypeError
+        else:
+            result: dict = {}
+            if is_detail: result.update(self.get_detail(session=session))
+            if is_lyric: result.update(self.get_lyric(session=session))
+            if is_file: result.update(self.get_file(session=session))
+            return result
+        
 
     def get_file(self, session: EncodeSession = None, level: str = "standard") -> dict:
         if session is None:

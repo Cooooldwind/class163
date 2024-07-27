@@ -1,11 +1,10 @@
 from setuptools import setup, find_packages
 
-# from ncmlistdownloader.common.global_args import CORE_VERSION_SETUP
 setup(
     classifiers=[
         # 发展时期
-        'Development Status :: 3 - Alpha',
-        # 'Development Status :: 4 - Beta',
+        # 'Development Status :: 3 - Alpha',
+        "Development Status :: 4 - Beta",
         # "Development Status :: 5 - Production/Stable",
         # 开发的目标用户
         "Intended Audience :: Customer Service",
@@ -29,7 +28,7 @@ setup(
         "Programming Language :: Python :: 3.12",
     ],
     name="class163",
-    version="0.2.1",
+    version="0.2.2",
     description="",
     author="CooooldWind_",
     url="https://gitee.com/CooooldWind/class163",
@@ -37,6 +36,5 @@ setup(
     install_requires=[
         "netease_encode_api",
     ],
-    entry_points={
-    },
+    entry_points={},
 )
