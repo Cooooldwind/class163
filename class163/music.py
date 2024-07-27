@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.2.0
+Version: 0.2.1
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -25,13 +25,13 @@ class Music:
         self.title: str = None  #  标题
         self.subtitle: str = None  #  副标题
         self.album: str = None  #  专辑
-        self.artist: list[str] = []  #  歌手
+        self.artist: list[str] = None  #  歌手
         self.publish_time = None  #  发布时间（年月日）
         self.trans_title: str = None  #  标题译文
         self.trans_album: str = None  #  专辑译文
-        self.trans_artist: dict = {}  #  歌手译文（需要用歌手原文作为键值）
-        self.detail_info_raw: dict = {}  #  解码类返回的数据
-        self.detail_info_sorted: dict = {}  #  整理后的数据
+        self.trans_artist: dict = None  #  歌手译文（需要用歌手原文作为键值）
+        self.detail_info_raw: dict = None  #  解码类返回的数据
+        self.detail_info_sorted: dict = None  #  整理后的数据
         self.cover_url: str = None
         #  歌词相关
         self.__lyric_encode_data = {
@@ -43,8 +43,8 @@ class Music:
         self.trans_lyric: str = None  #  歌词翻译
         self.trans_uploader: str = None  #  翻译歌词的网易云用户昵称
         self.trans_lyric_uptime = None  #  翻译的发布时间（年月日）
-        self.lyric_info_raw: dict = {}  #  解码类返回的数据
-        self.lyric_info_sorted: dict = {}  #  整理后的数据
+        self.lyric_info_raw: dict = None  #  解码类返回的数据
+        self.lyric_info_sorted: dict = None  #  整理后的数据
         #  音乐文件相关
         """
         id表示歌曲的id号, 
@@ -60,8 +60,11 @@ class Music:
             "encodeType": None,  #  如果是lossless就用aac, 其他是mp3
             "csrf_token": "",
         }  #  解码时的encode_data
-        self.file_info_raw: dict = {}
-        self.file_info_sorted: dict = {}
+        self.file_info_raw: dict = None
+        self.file_url: str = None
+        self.file_md5: str = None
+        self.file_size: int = None
+        self.file_info_sorted: dict = None
 
     def get(self, type: str = "d", session: EncodeSession = None) -> dict:
         if session is None:
@@ -74,11 +77,26 @@ class Music:
     def get_file(self, session: EncodeSession = None, level: str = "standard") -> dict:
         if session is None:
             session = self.encode_session
+        if level not in ["standard","highter","exhigh","lossless"]: raise ValueError()
+        elif level == "lossless":
+            self.__file_encode_data["encodeType"] = "aac"
+        else: self.__file_encode_data["encodeType"] = "mp3"
+        self.__file_encode_data["level"] = level
         self.file_info_raw = session.get_response(
             url="https://music.163.com/weapi/song/enhance/player/url/v1",
             encode_data=self.__file_encode_data,
-        )
-        return self.file_info_raw
+        )["data"][0]
+        self.file_url = str(self.file_info_raw["url"])
+        if self.file_url.find("?authSecret") != -1:
+            self.file_url = self.file_url[:self.file_url.find("?authSecret")]
+        self.file_md5 = str(self.file_info_raw["md5"])
+        self.file_size = int(self.file_info_raw["size"])
+        self.file_info_sorted = {
+            "url": self.file_url,
+            "md5": self.file_md5,
+            "size": self.file_size,
+        }
+        return self.file_info_sorted
 
     def get_lyric(self, session: EncodeSession = None) -> dict:
         if session is None:
@@ -88,9 +106,9 @@ class Music:
             encode_data=self.__lyric_encode_data,
         )
         #
-        self.lyric = self.lyric_info_raw["lrc"]["lyric"]
-        self.trans_lyric = self.lyric_info_raw["tlyric"]["lyric"]
-        self.trans_uploader = self.lyric_info_raw["transUser"]["nickname"]
+        self.lyric = str(self.lyric_info_raw["lrc"]["lyric"])
+        self.trans_lyric = str(self.lyric_info_raw["tlyric"]["lyric"])
+        self.trans_uploader = str(self.lyric_info_raw["transUser"]["nickname"])
         #
         self.trans_lyric_uptime = time.localtime(
             int(self.lyric_info_raw["transUser"]["uptime"]) / 1000
@@ -114,8 +132,8 @@ class Music:
             encode_data=self.__detail_encode_data,
         )["songs"][0]
         #
-        self.title = self.detail_info_raw["name"]
-        self.album = self.detail_info_raw["al"]["name"]
+        self.title = str(self.detail_info_raw["name"])
+        self.album = str(self.detail_info_raw["al"]["name"])
         #
         self.publish_time = time.localtime(
             int(self.detail_info_raw["publishTime"]) / 1000
@@ -124,22 +142,22 @@ class Music:
         #
         if "alia" in self.detail_info_raw:
             if len(self.detail_info_raw["alia"]) > 0:
-                self.subtitle = self.detail_info_raw["alia"][0]
+                self.subtitle = str(self.detail_info_raw["alia"][0])
         #
         if "tns" in self.detail_info_raw:
             if len(self.detail_info_raw["tns"]) > 0:
-                self.trans_title = self.detail_info_raw["tns"][0]
+                self.trans_title = str(self.detail_info_raw["tns"][0])
         #
         if "tns" in self.detail_info_raw["al"]:
             if len(self.detail_info_raw["al"]["tns"]) > 0:
-                self.trans_album = self.detail_info_raw["al"]["tns"][0]
+                self.trans_album = str(self.detail_info_raw["al"]["tns"][0])
         #
         for i in self.detail_info_raw["ar"]:
-            self.artist.append(i["name"])
+            self.artist.append(str(i["name"]))
             if "tns" in i:
                 if len(i["tns"]) > 0:
-                    self.trans_artist.update({str(i["name"]): i["tns"]})
-        self.cover_url = self.detail_info_raw["al"]["picUrl"]
+                    self.trans_artist.update({str(i["name"]): str(i["tns"])})
+        self.cover_url = str(self.detail_info_raw["al"]["picUrl"])
         #
         self.detail_info_sorted.update(
             {
