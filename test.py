@@ -1,7 +1,8 @@
 import time
-from pprint import pprint
+import pprint
 from selenium import webdriver
-from class163.music import Music
+from class163.playlist import Playlist
+from netease_encode_api import EncodeSession
 
 driver = webdriver.ChromiumEdge()
 driver.get("https://music.163.com/#/login/")
@@ -14,7 +15,8 @@ while True:
         break
     else:
         time.sleep(0.5)
-#  pprint(cookies)
-m = Music("https://music.163.com/song?id=1839931917")
-m.encode_session.set_cookies(cookies)
-pprint(m.get("fld"))
+s = EncodeSession()
+s.set_cookies(cookies)
+p = Playlist("https://music.163.com/playlist?id=9269203337")
+with open("result.json", "w+", encoding="UTF-8") as file:
+    pprint.pprint(p.get(session=s), indent=2)
