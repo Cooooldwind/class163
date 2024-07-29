@@ -1,5 +1,5 @@
 import time
-import pprint
+from tqdm import tqdm
 from class163.playlist import Playlist
 from netease_encode_api import EncodeSession
 from class163.origin_file import OriginFile
@@ -26,14 +26,16 @@ p = Playlist("https://music.163.com/playlist?id=9097772489")
 p.get(detail=False, session=s)
 for m in p.track[0:5]:
     m.get("dlf", session=s, level="standard")
-    print(f"{m.title} - {artist_join(m.artist)}")
     of = OriginFile(m.file_url)
     of.begin_download(multi_thread=True)
     while of.get_percentage() < 100.0:
-        print(of.get_percentage())
-        time.sleep(0.1)
+        with tqdm(
+            total=of.tot_size,
+            unit="b",
+            desc=f"Downloading: {m.title} - {artist_join(m.artist)}",
+        ) as t:
+            t.update(of.now_size)
     with open(f"{m.title} - {artist_join(m.artist)}.mp3", "wb") as f:
         f.write(of.data)
     with open(f"{m.title} - {artist_join(m.artist)}.lrc", "w+", encoding="UTF-8") as f:
         f.write(m.lyric)
-
