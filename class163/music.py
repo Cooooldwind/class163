@@ -85,7 +85,7 @@ class Music:
             if is_detail: result.update(self.get_detail(session=session))
             if is_lyric: result.update(self.get_lyric(session=session))
             if is_file: 
-                if level not in ["standard","highter","exhigh","lossless"]: raise ValueError("Unknown level argument.")
+                if level not in ["standard","higher","exhigh","lossless"]: raise ValueError("Unknown level argument.")
                 result.update(self.get_file(session=session, level=level))
             return result
         
@@ -93,7 +93,7 @@ class Music:
     def get_file(self, session: EncodeSession = None, level: str = "standard") -> dict:
         if session is None:
             session = self.encode_session
-        if level not in ["standard","highter","exhigh","lossless"]: raise ValueError()
+        if level not in ["standard","higher","exhigh","lossless"]: raise ValueError()
         elif level == "lossless":
             self.__file_encode_data["encodeType"] = "aac"
         else: self.__file_encode_data["encodeType"] = "mp3"
