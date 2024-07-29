@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.3.0
+Version: 0.3.3
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -66,37 +66,44 @@ class Music:
         self.file_info_raw: dict = {}  #  解码类返回的数据
         self.file_info_sorted: dict = {}  #  整理后的数据
 
-    def get(self, mode: str, session: EncodeSession = None, level: str = "standard") -> dict:
+    def get(
+        self, mode: str, session: EncodeSession = None, level: str = "standard"
+    ) -> dict:
         if session is None:
             session = self.encode_session
         is_detail, is_lyric, is_file = False, False, False
         if "d" in mode:
             is_detail = True
-            mode = mode.replace("d","")
+            mode = mode.replace("d", "")
         if "l" in mode:
             is_lyric = True
-            mode = mode.replace("l","")
+            mode = mode.replace("l", "")
         if "f" in mode:
             is_file = True
-            mode = mode.replace("f","")
-        if len(mode) > 0: raise TypeError("Unknown mode.")
+            mode = mode.replace("f", "")
+        if len(mode) > 0:
+            raise TypeError("Unknown mode.")
         else:
             result: dict = {}
-            if is_detail: result.update(self.get_detail(session=session))
-            if is_lyric: result.update(self.get_lyric(session=session))
-            if is_file: 
-                if level not in ["standard","higher","exhigh","lossless"]: raise ValueError("Unknown level argument.")
+            if is_detail:
+                result.update(self.get_detail(session=session))
+            if is_lyric:
+                result.update(self.get_lyric(session=session))
+            if is_file:
+                if level not in ["standard", "higher", "exhigh", "lossless"]:
+                    raise ValueError("Unknown level argument.")
                 result.update(self.get_file(session=session, level=level))
             return result
-        
 
     def get_file(self, session: EncodeSession = None, level: str = "standard") -> dict:
         if session is None:
             session = self.encode_session
-        if level not in ["standard","higher","exhigh","lossless"]: raise ValueError()
+        if level not in ["standard", "higher", "exhigh", "lossless"]:
+            raise ValueError()
         elif level == "lossless":
             self.__file_encode_data["encodeType"] = "aac"
-        else: self.__file_encode_data["encodeType"] = "mp3"
+        else:
+            self.__file_encode_data["encodeType"] = "mp3"
         self.__file_encode_data["level"] = level
         self.file_info_raw = session.get_response(
             url="https://music.163.com/weapi/song/enhance/player/url/v1",
@@ -104,7 +111,7 @@ class Music:
         )["data"][0]
         self.file_url = str(self.file_info_raw["url"])
         if self.file_url.find("?authSecret") != -1:
-            self.file_url = self.file_url[:self.file_url.find("?authSecret")]
+            self.file_url = self.file_url[: self.file_url.find("?authSecret")]
         self.file_md5 = str(self.file_info_raw["md5"])
         self.file_size = int(self.file_info_raw["size"])
         self.file_info_sorted = {
@@ -123,13 +130,18 @@ class Music:
         )
         #  歌词、歌词翻译、翻译上传者
         self.lyric = str(self.lyric_info_raw["lrc"]["lyric"])
-        self.trans_lyric = str(self.lyric_info_raw["tlyric"]["lyric"])
-        self.trans_uploader = str(self.lyric_info_raw["transUser"]["nickname"])
+        if "tlyric" in self.detail_info_raw:
+            if "lyric" in self.detail_info_raw["tlyric"]:
+                self.trans_lyric = str(self.lyric_info_raw["tlyric"]["lyric"])
+        if "transUser" in self.detail_info_raw:
+            if "nickname" in self.detail_info_raw["transUser"]:
+                self.trans_uploader = str(self.lyric_info_raw["transUser"]["nickname"])
         #  翻译上传时间（精确到分钟）
-        self.trans_lyric_uptime = time.localtime(
-            int(self.lyric_info_raw["transUser"]["uptime"]) / 1000
-        )
-        self.trans_lyric_uptime = self.trans_lyric_uptime[0:5]
+            if "uptime" in self.detail_info_raw["transUser"]:
+                self.trans_lyric_uptime = time.localtime(
+                    int(self.lyric_info_raw["transUser"]["uptime"]) / 1000
+                )
+                self.trans_lyric_uptime = self.trans_lyric_uptime[0:5]
         #  整理
         self.lyric_info_sorted = {
             "lyric": self.lyric,
@@ -204,3 +216,10 @@ def url_to_id(url: str) -> int:
             raise ValueError("URL 中未找到 'id' 参数")
     except (ValueError, TypeError) as e:
         raise e
+
+def artist_join(artist: list[str], separator: str = ", ") -> str:
+    artist_str = ""
+    for i in artist[:-1]:
+        artist_str += i + separator
+    artist_str += artist[-1]
+    return artist_str

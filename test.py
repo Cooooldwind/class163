@@ -1,9 +1,10 @@
 import time
 import pprint
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from class163.playlist import Playlist
 from netease_encode_api import EncodeSession
+from class163.origin_file import OriginFile
+from class163.music import artist_join
+import qt_test
 
 """
 driver = webdriver.ChromiumEdge()
@@ -18,21 +19,21 @@ while True:
     else:
         time.sleep(0.5)
 """
-options = Options()
-options.binary_location = "chromedriver.exe"
-driver = webdriver.Chrome(options=options)
-driver.get("https://music.163.com/#/login/")
-cookies = None
-while True:
-    cookies = driver.get_cookie("MUSIC_U")
-    if cookies != None:
-        cookies = {cookies["name"]: cookies["value"]}
-        driver.close()
-        break
-    else:
-        time.sleep(0.5)
 s = EncodeSession()
-s.set_cookies(cookies)
-p = Playlist("https://music.163.com/playlist?id=9269203337")
-with open("result.json", "w+", encoding="UTF-8") as file:
-    pprint.pprint(p.get(session=s), indent=2)
+c = qt_test.login()
+s.set_cookies(c)
+p = Playlist("https://music.163.com/playlist?id=9097772489")
+p.get(detail=False, session=s)
+for m in p.track[0:5]:
+    m.get("dlf", session=s, level="standard")
+    print(f"{m.title} - {artist_join(m.artist)}")
+    of = OriginFile(m.file_url)
+    of.begin_download(multi_thread=True)
+    while of.get_percentage() < 100.0:
+        print(of.get_percentage())
+        time.sleep(0.1)
+    with open(f"{m.title} - {artist_join(m.artist)}.mp3", "wb") as f:
+        f.write(of.data)
+    with open(f"{m.title} - {artist_join(m.artist)}.lrc", "w+", encoding="UTF-8") as f:
+        f.write(m.lyric)
+
