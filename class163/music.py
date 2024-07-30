@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.3.4
+Version: 0.3.7
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -9,10 +9,14 @@ Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
 import time
 from netease_encode_api import EncodeSession
 from urllib.parse import urlparse, parse_qs
+from typing import Literal
+from typing_extensions import TypeAlias
+from class163.global_args import GlobalArgs
 
 
 class Music:
     def __init__(self, id: int | str) -> None:
+        self.global_args = GlobalArgs()
         #  最刚开始时要有的: 解码会话, ID
         self.id = str(id)  #  ID (如果检测到是URL会自动转格式)
         if self.id.find("music.163.com") != -1:
@@ -67,22 +71,36 @@ class Music:
         self.file_info_sorted: dict = {}  #  整理后的数据
 
     def get(
-        self, mode: str, session: EncodeSession = None, level: str = "standard"
+        self,
+        mode: TypeAlias = Literal[
+            "d",
+            "l",
+            "f",
+            "df",
+            "dl",
+            "fd",
+            "fl",
+            "ld",
+            "lf",
+            "fld",
+            "fdl",
+            "ldf",
+            "lfd",
+            "dfl",
+            "dlf",
+        ],
+        session: EncodeSession = None,
+        level: TypeAlias = Literal["standard", "higher", "exhigh", "lossless"],
     ) -> dict:
         if session is None:
             session = self.encode_session
         is_detail, is_lyric, is_file = False, False, False
         if "d" in mode:
             is_detail = True
-            mode = mode.replace("d", "")
         if "l" in mode:
             is_lyric = True
-            mode = mode.replace("l", "")
         if "f" in mode:
             is_file = True
-            mode = mode.replace("f", "")
-        if len(mode) > 0:
-            raise TypeError("Unknown mode.")
         else:
             result: dict = {}
             if is_detail:
@@ -90,23 +108,19 @@ class Music:
             if is_lyric:
                 result.update(self.get_lyric(session=session))
             if is_file:
-                if level not in ["standard", "higher", "exhigh", "lossless"]:
-                    raise ValueError("Unknown level argument.")
                 result.update(self.get_file(session=session, level=level))
             return result
 
-    def get_file(self, session: EncodeSession = None, level: str = "standard") -> dict:
+    def get_file(self, session: EncodeSession = None, level = Literal["standard", "higher", "exhigh", "lossless"]) -> dict:
         if session is None:
             session = self.encode_session
-        if level not in ["standard", "higher", "exhigh", "lossless"]:
-            raise ValueError()
         elif level == "lossless":
             self.__file_encode_data["encodeType"] = "aac"
         else:
             self.__file_encode_data["encodeType"] = "mp3"
         self.__file_encode_data["level"] = level
         self.file_info_raw = session.get_response(
-            url="https://music.163.com/weapi/song/enhance/player/url/v1",
+            url=self.global_args.FILE_URL,
             encode_data=self.__file_encode_data,
         )["data"][0]
         self.file_url = str(self.file_info_raw["url"])
@@ -125,7 +139,7 @@ class Music:
         if session is None:
             session = self.encode_session
         self.lyric_info_raw = session.get_response(
-            url="https://music.163.com/weapi/song/lyric",
+            url=self.global_args.LYRIC_URL,
             encode_data=self.__lyric_encode_data,
         )
         #  歌词、歌词翻译、翻译上传者
@@ -136,7 +150,7 @@ class Music:
         if "transUser" in self.detail_info_raw:
             if "nickname" in self.detail_info_raw["transUser"]:
                 self.trans_uploader = str(self.lyric_info_raw["transUser"]["nickname"])
-        #  翻译上传时间（精确到分钟）
+            #  翻译上传时间（精确到分钟）
             if "uptime" in self.detail_info_raw["transUser"]:
                 self.trans_lyric_uptime = time.localtime(
                     int(self.lyric_info_raw["transUser"]["uptime"]) / 1000
@@ -156,7 +170,7 @@ class Music:
         if session is None:
             session = self.encode_session
         self.detail_info_raw = session.get_response(
-            url="https://music.163.com/weapi/v3/song/detail",
+            url=self.global_args.DETAIL_URL,
             encode_data=self.__detail_encode_data,
         )["songs"][0]
         #  标题和专辑
@@ -216,6 +230,7 @@ def url_to_id(url: str) -> int:
             raise ValueError("URL 中未找到 'id' 参数")
     except (ValueError, TypeError) as e:
         raise e
+
 
 def artist_join(artist: list[str], separator: str = ", ") -> str:
     artist_str = ""
