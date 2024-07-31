@@ -1,6 +1,6 @@
 """
 class163/playlist.py
-Version: 0.3.2
+Version: 0.3.11
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -10,6 +10,7 @@ import time
 from netease_encode_api import EncodeSession
 from class163.music import Music
 from urllib.parse import urlparse, parse_qs
+from class163.global_args import *
 
 
 class Playlist:
@@ -38,8 +39,8 @@ class Playlist:
         self,
         detail: bool = True,
         session: EncodeSession = None,
-        mode: str = "d",
-        level: str = "standard",
+        mode: MODE = "d",
+        level: LEVEL = "standard",
     ) -> dict:
         if session == None:
             session = self.encode_session
@@ -80,7 +81,7 @@ class Playlist:
         }
         return self.info_sorted
 
-    def get_detail(self, mode: str = "d", level: str = "standard") -> dict:
+    def get_detail(self, mode: MODE = "d", level: LEVEL = "standard") -> dict:
         self.detail_info_sorted = self.info_sorted
         sorted_track: list[dict] = []
         self.detail_info_raw = self.info_raw

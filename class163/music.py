@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.3.7
+Version: 0.3.11
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -9,14 +9,11 @@ Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
 import time
 from netease_encode_api import EncodeSession
 from urllib.parse import urlparse, parse_qs
-from typing import Literal
-from typing_extensions import TypeAlias
-from class163.global_args import GlobalArgs
+from class163.global_args import *
 
 
 class Music:
     def __init__(self, id: int | str) -> None:
-        self.global_args = GlobalArgs()
         #  最刚开始时要有的: 解码会话, ID
         self.id = str(id)  #  ID (如果检测到是URL会自动转格式)
         if self.id.find("music.163.com") != -1:
@@ -62,7 +59,6 @@ class Music:
             "ids": str([self.id]),
             "level": None,  #  standard/higher/exhigh/lossless
             "encodeType": None,  #  如果是lossless就用aac, 其他是mp3
-            "csrf_token": "",
         }  #  解码时的encode_data
         self.file_url: str = None
         self.file_md5: str = None
@@ -72,25 +68,9 @@ class Music:
 
     def get(
         self,
-        mode: TypeAlias = Literal[
-            "d",
-            "l",
-            "f",
-            "df",
-            "dl",
-            "fd",
-            "fl",
-            "ld",
-            "lf",
-            "fld",
-            "fdl",
-            "ldf",
-            "lfd",
-            "dfl",
-            "dlf",
-        ],
+        mode: MODE = 'd',
         session: EncodeSession = None,
-        level: TypeAlias = Literal["standard", "higher", "exhigh", "lossless"],
+        level: LEVEL = "standard",
     ) -> dict:
         if session is None:
             session = self.encode_session
@@ -101,26 +81,25 @@ class Music:
             is_lyric = True
         if "f" in mode:
             is_file = True
-        else:
-            result: dict = {}
-            if is_detail:
-                result.update(self.get_detail(session=session))
-            if is_lyric:
-                result.update(self.get_lyric(session=session))
-            if is_file:
-                result.update(self.get_file(session=session, level=level))
-            return result
+        result: dict = {}
+        if is_detail:
+            result.update(self.get_detail(session=session))
+        if is_lyric:
+            result.update(self.get_lyric(session=session))
+        if is_file:
+            result.update(self.get_file(session=session, level=level))
+        return result
 
-    def get_file(self, session: EncodeSession = None, level = Literal["standard", "higher", "exhigh", "lossless"]) -> dict:
+    def get_file(self, session: EncodeSession = None, level: LEVEL = "standard") -> dict:
         if session is None:
             session = self.encode_session
-        elif level == "lossless":
+        if level == "lossless":
             self.__file_encode_data["encodeType"] = "aac"
         else:
             self.__file_encode_data["encodeType"] = "mp3"
         self.__file_encode_data["level"] = level
         self.file_info_raw = session.get_response(
-            url=self.global_args.FILE_URL,
+            url=FILE_URL,
             encode_data=self.__file_encode_data,
         )["data"][0]
         self.file_url = str(self.file_info_raw["url"])
@@ -139,19 +118,19 @@ class Music:
         if session is None:
             session = self.encode_session
         self.lyric_info_raw = session.get_response(
-            url=self.global_args.LYRIC_URL,
+            url=LYRIC_URL,
             encode_data=self.__lyric_encode_data,
         )
         #  歌词、歌词翻译、翻译上传者
         self.lyric = str(self.lyric_info_raw["lrc"]["lyric"])
-        if "tlyric" in self.detail_info_raw:
-            if "lyric" in self.detail_info_raw["tlyric"]:
+        if "tlyric" in self.lyric_info_raw:
+            if "lyric" in self.lyric_info_raw["tlyric"]:
                 self.trans_lyric = str(self.lyric_info_raw["tlyric"]["lyric"])
-        if "transUser" in self.detail_info_raw:
-            if "nickname" in self.detail_info_raw["transUser"]:
+        if "transUser" in self.lyric_info_raw:
+            if "nickname" in self.lyric_info_raw["transUser"]:
                 self.trans_uploader = str(self.lyric_info_raw["transUser"]["nickname"])
             #  翻译上传时间（精确到分钟）
-            if "uptime" in self.detail_info_raw["transUser"]:
+            if "uptime" in self.lyric_info_raw["transUser"]:
                 self.trans_lyric_uptime = time.localtime(
                     int(self.lyric_info_raw["transUser"]["uptime"]) / 1000
                 )
@@ -170,7 +149,7 @@ class Music:
         if session is None:
             session = self.encode_session
         self.detail_info_raw = session.get_response(
-            url=self.global_args.DETAIL_URL,
+            url=DETAIL_URL,
             encode_data=self.__detail_encode_data,
         )["songs"][0]
         #  标题和专辑
