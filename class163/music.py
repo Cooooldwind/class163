@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.3.11
+Version: 0.4.0
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -10,6 +10,8 @@ import time
 from netease_encode_api import EncodeSession
 from urllib.parse import urlparse, parse_qs
 from class163.global_args import *
+from requests import Session
+from requests.cookies import cookiejar_from_dict
 
 
 class Music:
@@ -68,11 +70,11 @@ class Music:
 
     def get(
         self,
-        mode: MODE = 'd',
-        session: EncodeSession = None,
+        mode: MODE = "d",
+        encode_session: EncodeSession = None,
         level: LEVEL = "standard",
     ) -> dict:
-        if session is None:
+        if encode_session is None:
             session = self.encode_session
         is_detail, is_lyric, is_file = False, False, False
         if "d" in mode:
@@ -90,13 +92,54 @@ class Music:
             result.update(self.get_file(session=session, level=level))
         return result
 
-    def get_file(self, session: EncodeSession = None, level: LEVEL = "standard") -> dict:
-        if session is None:
+    def file_info_sort(
+        self, file_url: str = None, file_md5: str = None, file_size: int = None
+    ) -> dict:
+        self.file_info_sorted = {
+            "url": file_url,
+            "md5": file_md5,
+            "size": file_size,
+        }
+        return self.file_info_sorted
+
+    def get_file(
+        self,
+        url: str = None,
+        offical: bool = True,
+        level: LEVEL = "standard",
+        encode_session: EncodeSession = None,
+        cookies: dict = None,
+        method: str = None,
+        **kwargs
+    ) -> dict:
+        if encode_session is None:
             session = self.encode_session
-        if level == "lossless":
-            self.__file_encode_data["encodeType"] = "aac"
+        if offical:
+            return self.__get_file_offical(encode_session=session, level=level)
         else:
+            return self.__get_file_third_party(
+                url=url, cookies=cookies, method=method, kwargs=kwargs
+            )
+
+    def __get_file_third_party(
+        self, method: str = None, url: str = None, cookies: dict = {}, **kwargs
+    ) -> dict:
+        session = Session()
+        session.cookies = cookiejar_from_dict(cookie_dict=cookies)
+        data = {}
+        data.update(**kwargs)
+        session.request(method=method, url=url, data=data).json()
+        return session.get(url=url, data=data).json()
+
+    def __get_file_offical(
+        self, encode_session: EncodeSession = None, level: LEVEL = "standard"
+    ) -> dict:
+        if encode_session is None:
+            session = self.encode_session
+        if level in ["standard", "higher", "exhigh"]:
             self.__file_encode_data["encodeType"] = "mp3"
+        else:
+            self.__file_encode_data["encodeType"] = "aac"
         self.__file_encode_data["level"] = level
         self.file_info_raw = session.get_response(
             url=FILE_URL,
@@ -107,15 +150,12 @@ class Music:
             self.file_url = self.file_url[: self.file_url.find("?authSecret")]
         self.file_md5 = str(self.file_info_raw["md5"])
         self.file_size = int(self.file_info_raw["size"])
-        self.file_info_sorted = {
-            "url": self.file_url,
-            "md5": self.file_md5,
-            "size": self.file_size,
-        }
-        return self.file_info_sorted
+        return self.file_info_sort(
+            file_url=self.file_url, file_md5=self.file_md5, file_size=self.file_size
+        )
 
-    def get_lyric(self, session: EncodeSession = None) -> dict:
-        if session is None:
+    def get_lyric(self, encode_session: EncodeSession = None) -> dict:
+        if encode_session is None:
             session = self.encode_session
         self.lyric_info_raw = session.get_response(
             url=LYRIC_URL,
@@ -145,8 +185,8 @@ class Music:
         #
         return self.lyric_info_sorted
 
-    def get_detail(self, session: EncodeSession = None) -> dict:
-        if session is None:
+    def get_detail(self, encode_session: EncodeSession = None) -> dict:
+        if encode_session is None:
             session = self.encode_session
         self.detail_info_raw = session.get_response(
             url=DETAIL_URL,
@@ -198,13 +238,13 @@ class Music:
         return self.detail_info_sorted
 
 
-def url_to_id(url: str) -> int:
+def url_to_id(url: str) -> str:
     try:
         parsed_url = urlparse(url)
         query_params = parse_qs(parsed_url.query)
         song_id = query_params.get("id", [None])[0]
         if song_id is not None:
-            return int(song_id)
+            return str(song_id)
         else:
             raise ValueError("URL 中未找到 'id' 参数")
     except (ValueError, TypeError) as e:
