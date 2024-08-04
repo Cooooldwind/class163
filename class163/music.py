@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.4.0
+Version: 0.4.1
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -72,7 +72,12 @@ class Music:
         self,
         mode: MODE = "d",
         encode_session: EncodeSession = None,
+        url: str = None,
+        offical: bool = True,
         level: LEVEL = "standard",
+        cookies: dict = None,
+        method: str = "get",
+        **kwargs
     ) -> dict:
         if encode_session is None:
             session = self.encode_session
@@ -89,16 +94,26 @@ class Music:
         if is_lyric:
             result.update(self.get_lyric(session=session))
         if is_file:
-            result.update(self.get_file(session=session, level=level))
+            result.update(
+                self.get_file(
+                    offical=offical,
+                    encode_session=session,
+                    level=level,
+                    url=url,
+                    cookies=cookies,
+                    method=method,
+                    kwargs=kwargs,
+                )
+            )
         return result
 
     def file_info_sort(
         self, file_url: str = None, file_md5: str = None, file_size: int = None
     ) -> dict:
         self.file_info_sorted = {
-            "url": file_url,
-            "md5": file_md5,
-            "size": file_size,
+            "file_url": file_url,
+            "file_md5": file_md5,
+            "file_size": file_size,
         }
         return self.file_info_sorted
 
@@ -109,7 +124,10 @@ class Music:
         level: LEVEL = "standard",
         encode_session: EncodeSession = None,
         cookies: dict = None,
-        method: str = None,
+        method: str = "get",
+        url_key: list = [],
+        md5_key: list = [],
+        size_key: list = [],
         **kwargs
     ) -> dict:
         if encode_session is None:
@@ -118,18 +136,52 @@ class Music:
             return self.__get_file_offical(encode_session=session, level=level)
         else:
             return self.__get_file_third_party(
-                url=url, cookies=cookies, method=method, kwargs=kwargs
+                url=url,
+                cookies=cookies,
+                method=method,
+                url_key=url_key,
+                md5_key=md5_key,
+                size_key=size_key,
+                kwargs=kwargs,
             )
 
     def __get_file_third_party(
-        self, method: str = None, url: str = None, cookies: dict = {}, **kwargs
+        self,
+        method: str,
+        url: str,
+        cookies: dict,
+        url_key: list,
+        md5_key: list,
+        size_key: list,
+        **kwargs
     ) -> dict:
         session = Session()
         session.cookies = cookiejar_from_dict(cookie_dict=cookies)
         data = {}
         data.update(**kwargs)
-        session.request(method=method, url=url, data=data).json()
-        return session.get(url=url, data=data).json()
+        response = session.request(method=method, url=url, data=data).json()
+        response = self.__extract_info(
+            raw_info=response, url_key=url_key, md5_key=md5_key, size_key=size_key
+        )
+        return response
+
+    def __find_key(
+        self, nested: dict | str | float | int | bool | list | None, key: list
+    ) -> str:
+        if len(key) == 0:
+            return nested
+        else:
+            return self.__find_key(nested=nested[key[0]], key=key[1:])
+
+    def __extract_info(
+        self, raw_info: dict, url_key: list, md5_key: list, size_key: list
+    ):
+        result = {
+            "file_url": self.__find_key(nested=raw_info, key=url_key),
+            "file_md5": self.__find_key(nested=raw_info, key=md5_key),
+            "file_size": self.__find_key(nested=raw_info, key=size_key),
+        }
+        return result
 
     def __get_file_offical(
         self, encode_session: EncodeSession = None, level: LEVEL = "standard"
