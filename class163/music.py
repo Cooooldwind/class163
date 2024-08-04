@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.4.2
+Version: 0.4.3
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -83,6 +83,9 @@ class Music:
         level: LEVEL = "standard",
         cookies: dict = None,
         method: str = "get",
+        url_key: list = [],
+        md5_key: list = [],
+        size_key: list = [],
         **kwargs
     ) -> dict:
         """
@@ -94,6 +97,9 @@ class Music:
         :param level: 音乐品质
         :param cookies: 用于请求的 Cookie 字典
         :param method: 请求方法，默认为'get'
+        :param url_key: 用于提取文件 URL 的键列表
+        :param md5_key: 用于提取文件 MD5 的键列表
+        :param size_key: 用于提取文件大小的键列表
         :param kwargs: 其他关键字参数
         :return: 包含请求结果的字典
         """
