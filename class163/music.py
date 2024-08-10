@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.4.3
+Version: 0.4.4
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -104,7 +104,7 @@ class Music:
         :return: 包含请求结果的字典
         """
         if encode_session is None:
-            session = self.encode_session
+            encode_session = self.encode_session
         is_detail, is_lyric, is_file = False, False, False
         if "d" in mode:
             is_detail = True
@@ -114,14 +114,14 @@ class Music:
             is_file = True
         result: dict = {}
         if is_detail:
-            result.update(self.get_detail(session=session))
+            result.update(self.get_detail(encode_session=encode_session))
         if is_lyric:
-            result.update(self.get_lyric(session=session))
+            result.update(self.get_lyric(encode_session=encode_session))
         if is_file:
             result.update(
                 self.get_file(
                     offical=offical,
-                    encode_session=session,
+                    encode_session=encode_session,
                     level=level,
                     url=url,
                     cookies=cookies,
@@ -176,9 +176,9 @@ class Music:
         :return: 文件信息字典
         """
         if encode_session is None:
-            session = self.encode_session
+            encode_session = self.encode_session
         if offical:
-            return self.__get_file_offical(encode_session=session, level=level)
+            return self.__get_file_offical(encode_session=encode_session, level=level)
         else:
             return self.__get_file_third_party(
                 url=url,
@@ -263,13 +263,13 @@ class Music:
         :return: 文件信息字典
         """
         if encode_session is None:
-            session = self.encode_session
+            encode_session = self.encode_session
         if level in ["standard", "higher", "exhigh"]:
             self.__file_encode_data["encodeType"] = "mp3"
         else:
             self.__file_encode_data["encodeType"] = "aac"
         self.__file_encode_data["level"] = level
-        self.file_info_raw = session.get_response(
+        self.file_info_raw = encode_session.get_response(
             url=FILE_URL,
             encode_data=self.__file_encode_data,
         )["data"][0]
@@ -289,8 +289,8 @@ class Music:
         :return: 歌词信息字典
         """
         if encode_session is None:
-            session = self.encode_session
-        self.lyric_info_raw = session.get_response(
+            encode_session = self.encode_session
+        self.lyric_info_raw = encode_session.get_response(
             url=LYRIC_URL,
             encode_data=self.__lyric_encode_data,
         )
@@ -325,8 +325,8 @@ class Music:
         :return: 详细信息字典
         """
         if encode_session is None:
-            session = self.encode_session
-        self.detail_info_raw = session.get_response(
+            encode_session = self.encode_session
+        self.detail_info_raw = encode_session.get_response(
             url=DETAIL_URL,
             encode_data=self.__detail_encode_data,
         )["songs"][0]
