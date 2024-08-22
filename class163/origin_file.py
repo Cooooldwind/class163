@@ -1,6 +1,6 @@
 """
 class163/orifin_file.py
-Version: 0.4.5*Unreleased
+Version: 0.5.0*Unreleased
 Author: CooooldWind_/ChatGPT
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
