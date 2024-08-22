@@ -1,0 +1,2 @@
+1. 修改对于AI的署名方式
+2. 增加 BasicMusicType 类，重构 Music 类
