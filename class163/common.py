@@ -19,7 +19,7 @@ class BasicMusicType():
         self.trans_album: str = None
         self.trans_lyric: str = None
 
-    def read(self, origin_dict: dict,
+    def write(self, origin_dict: dict,
              title_keys: list = None,
              subtitle_keys: list = None,
              artist_keys: list = None,
