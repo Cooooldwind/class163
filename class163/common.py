@@ -137,7 +137,7 @@ class BasicMusicType():
                 temp_dict = temp_dict[temp_key]
             if temp_dict.class == str:
                 self.music_file = temp_dict
-                return_dict['music_file'] = self.music_file
+                return_dict['music_file'] = OriginFile(self.music_file)
         # 封面文件
         if cover_file_keys != None:
             temp_dict = origin_dict
@@ -145,6 +145,6 @@ class BasicMusicType():
                 temp_dict = temp_dict[temp_key]
             if temp_dict.class == str:
                 self.cover_file = temp_dict
-                return_dict['cover_file'] = self.cover_file
+                return_dict['cover_file'] = OriginFile(self.cover_file)
         return return_dict
             
