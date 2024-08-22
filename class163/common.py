@@ -45,3 +45,5 @@ class BasicMusicType():
         # ... 为其他属性重复上述过程 ...
 
         return return_dict
+
+# fixed by 马建仓
