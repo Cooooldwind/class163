@@ -1,7 +1,7 @@
 """
 class163/music.py
-Version: 0.4.4
-Author: CooooldWind_
+Version: 0.4.5*Unreleased
+Author: CooooldWind_/豆包@字节跳动
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
 """
