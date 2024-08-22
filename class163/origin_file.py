@@ -1,9 +1,8 @@
 """
 class163/orifin_file.py
-Version: 0.2.0
-Author: CooooldWind_
+Version: 0.4.5*Unreleased
+Author: CooooldWind_/ChatGPT
 E-Mail: 3091868003@qq.com
-*Coding with ChatGPT
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
 """
 import threading
