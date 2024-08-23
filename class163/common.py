@@ -12,7 +12,7 @@ class BasicMusicType:
     def __init__(self):
         self.info = {}
 
-    def extract(self, origin_dict: dict, keys: List[Union[str, int]], expected_type) -> Optional[Union[str, list]]:
+    def extract(self, origin_dict: dict, keys: List[Union[str, int]], expected_type) -> Optional[Union[str, list, int]]:
         try:
             temp_dict = origin_dict
             for key in keys if isinstance(keys, list) else [keys]:
@@ -22,3 +22,9 @@ class BasicMusicType:
         except KeyError:
             pass
         return None
+
+    def extract_in_list(self, origin_list = List[Optional[dict]], keys: List[Union[str, int]], expected_type) -> List:
+        result_list = []
+        for i in origin_list:
+            result_list.append(self.extract(i, keys, expected_type))
+        return result_list
