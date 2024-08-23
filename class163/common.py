@@ -49,11 +49,24 @@ class BasicMusicType():
             pass
         return None
 
-    def write(self, origin_dict: dict, title_keys: Optional[List[str]] = None, subtitle_keys: Optional[List[str]] = None, artist_keys: Optional[List[str]] = None,
-             artist_list_keys: Optional[List[str]] = None, album_keys: Optional[List[str]] = None, lyric_keys: Optional[List[str]] = None,
-             trans_title_keys: Optional[List[str]] = None, trans_artist_keys: Optional[List[str]] = None, trans_artist_list_keys: Optional[List[str]] = None,
-             trans_album_keys: Optional[List[str]] = None, trans_lyric_keys: Optional[List[str]] = None, music_file_keys: Optional[List[str]] = None,
-             cover_file_keys: Optional[List[str]] = None) -> Optional[Dict]:
+    def write(self, origin_dict: dict, keys: Optional[Dict[list[str]]] = None
+    """
+    title_keys: Optional[List[str]] = None,
+    subtitle_keys: Optional[List[str]] = None,
+    artist_keys: Optional[List[str]] = None,
+    artist_list_keys: Optional[List[str]] = None,
+    album_keys: Optional[List[str]] = None,
+    lyric_keys: Optional[List[str]] = None,
+    trans_title_keys: Optional[List[str]] = None,
+    trans_artist_keys: Optional[List[str]] = None,
+    trans_artist_list_keys: Optional[List[str]] = None,
+    trans_album_keys: Optional[List[str]] = None,
+    trans_lyric_keys: Optional[List[str]] = None,
+    music_file_keys: Optional[List[str]] = None,
+    cover_file_keys: Optional[List[str]] = None
+    """
+    ) -> Optional[Dict]:
+        pass
         """
         从给定的字典中提取音乐相关信息，并以字典形式返回。
 
