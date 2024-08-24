@@ -1,7 +1,7 @@
 """
 class163/music.py
-Version: 0.5.0*Unreleased
-Author: CooooldWind_
+Version: 0.5.1
+Author: CooooldWind_/豆包@字节跳动
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
 """
@@ -12,44 +12,84 @@ from urllib.parse import urlparse, parse_qs
 from class163.global_args import *
 from requests import Session
 from requests.cookies import cookiejar_from_dict
-from class163.common import BasicMusicType
+from class163.common import BasicMusicType, extract, extract_in_list
+from typing import Optional, Dict, List, Union, Type
+
 
 class Music(BasicMusicType):
     def __init__(self, id: int | str) -> None:
-        self.super.__init__()
-        self.id = str(id)  
-        if self.id.find("music.163.com")!= -1:
+        super().__init__()
+        self.id = str(id)
+        if self.id.find("music.163.com") != -1:
             self.id = url_to_id(self.id)
         self.encode_session = EncodeSession()  # 创建解码会话
         # 详细信息相关的初始化
         self.__detail_encode_data = {
             "c": str([{"id": self.id}]),
-        }  
+        }
         # 歌词相关的初始化
         self.__lyric_encode_data = {
             "id": self.id,
             "lv": -1,
             "tv": -1,
-        }  
+        }
         # 音乐文件相关的初始化
         """
-        id 表示歌曲的 id 号, 
-        level 是音乐品质, 
-        标准为 standard, 
-        较高音质为 higher, 
-        极高音质 exhigh, 
+        id 表示歌曲的 id 号,
+        level 是音乐品质,
+        标准为 standard,
+        较高音质为 higher,
+        极高音质 exhigh,
         无损音质关键词为 lossless。
         """
         self.__file_encode_data = {
             "ids": str([self.id]),
             "level": None,  # standard/higher/exhigh/lossless
             "encodeType": None,  # 如果是 lossless 就用 aac, 其他是 mp3
-        }  
+        }
+        self.lyric_info_raw: dict = {}  # 原始的歌词信息数据
+        self.detail_info_raw: dict = {}  # 原始的详细信息数据
+        self.file_info_raw: dict = {}  # 原始的文件信息数据
 
-        def get(self, mode: MODE = "d", encode_session: EncodeSession = None,
-        url: str = None, offical: bool = True, level: LEVEL = "standard",
-        cookies: dict = None,  method: str = "get", **kwargs) -> dict:
-        pass
+    def get(
+        self,
+        mode: MODE = "d",
+        encode_session: EncodeSession = None,
+        level: LEVEL = "standard",
+        offical: bool = True,
+        # 如果使用外部链接
+        url: str = None,
+        cookies: dict = None,
+        method: str = "get",
+        **kwargs
+    ) -> Dict:
+        if encode_session is None:
+            encode_session = self.encode_session
+        if "d" in mode:
+            self.get_detail(encode_session=encode_session)
+
+    def get_detail(
+        self,
+        encode_session: EncodeSession = None,
+    ) -> Dict:
+        if encode_session is None:
+            encode_session = self.encode_session
+        self.detail_info_raw = encode_session.get_response(
+            url=DETAIL_URL,
+            encode_data=self.__detail_encode_data,
+        )["songs"][0]
+        origin = self.detail_info_raw
+        self.title = extract(origin, ["name"], str)
+        self.album = extract(origin, ["al", "name"], str)
+        self.subtitle = extract(origin, ["alia", 0], str)
+        self.trans_title = extract(origin, ["tns", 0], str)
+        self.trans_album = extract(origin, ["al", "tns", 0], str)
+        artists = extract(origin, ["ar"], list)
+        self.artist = extract_in_list(artists, ["name"], str)
+        self.trans_artist = extract_in_list(artists, ["tns"], str)
+        publish_time = time.localtime(int(extract(origin, ["publishTime"], int)) / 1000)
+        self.publish_time = list(publish_time[0:3])
+        return self.info_dict()
 
 
 def url_to_id(url: str) -> str:
