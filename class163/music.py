@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.5.1
+Version: 0.5.2
 Author: CooooldWind_/豆包@字节跳动
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -71,7 +71,7 @@ class Music(BasicMusicType):
     def get_detail(
         self,
         encode_session: EncodeSession = None,
-    ) -> Dict:
+    ) -> Optional[Dict]:
         if encode_session is None:
             encode_session = self.encode_session
         self.detail_info_raw = encode_session.get_response(
@@ -79,15 +79,35 @@ class Music(BasicMusicType):
             encode_data=self.__detail_encode_data,
         )["songs"][0]
         origin = self.detail_info_raw
-        self.title = extract(origin, ["name"], str)
-        self.album = extract(origin, ["al", "name"], str)
-        self.subtitle = extract(origin, ["alia", 0], str)
-        self.trans_title = extract(origin, ["tns", 0], str)
-        self.trans_album = extract(origin, ["al", "tns", 0], str)
-        artists = extract(origin, ["ar"], list)
-        self.artist = extract_in_list(artists, ["name"], str)
-        self.trans_artist = extract_in_list(artists, ["tns"], str)
-        publish_time = time.localtime(int(extract(origin, ["publishTime"], int)) / 1000)
+        result = self.extract_detail(origin=origin)
+        return result
+
+    def extract_detail(
+        self,
+        origin: Dict,
+        id_keys: List[Union[str, int]] = ["id"],
+        title_keys: List[Union[str, int]] = ["name"],
+        album_keys: List[Union[str, int]] = ["al", "name"],
+        subtitle_keys: List[Union[str, int]] = ["alia", 0],
+        trans_title_keys: List[Union[str, int]] = ["tns", 0],
+        trans_album_keys: List[Union[str, int]] = ["al", "tns", 0],
+        artist_list_keys: List[Union[str, int]] = ["ar"],
+        artist_keys: List[Union[str, int]] = ["name"],
+        trans_artist_keys: List[Union[str, int]] = ["tns"],
+        publish_time_keys: List[Union[str, int]] = ["publishTime"],
+    ) -> Optional[Dict]:
+        self.id = extract(origin, id_keys, int)
+        self.title = extract(origin, title_keys, str)
+        self.album = extract(origin, album_keys, str)
+        self.subtitle = extract(origin, subtitle_keys, str)
+        self.trans_title = extract(origin, trans_title_keys, str)
+        self.trans_album = extract(origin, trans_album_keys, str)
+        artists = extract(origin, artist_list_keys, list)
+        self.artist = extract_in_list(artists, artist_keys, str)
+        self.trans_artist = extract_in_list(artists, trans_artist_keys, str)
+        publish_time = time.localtime(
+            int(extract(origin, publish_time_keys, int)) / 1000
+        )
         self.publish_time = list(publish_time[0:3])
         return self.info_dict()
 

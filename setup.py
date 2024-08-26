@@ -28,7 +28,7 @@ setup(
         "Programming Language :: Python :: 3.12",
     ],
     name="class163",
-    version="0.5.0",
+    version="0.5.2",
     description="",
     author="CooooldWind_",
     url="https://gitee.com/CooooldWind/class163",

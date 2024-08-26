@@ -1,6 +1,6 @@
 import time
 from tqdm import tqdm
-from class163.playlist import Playlist
+from class163.playlist_old import Playlist
 from netease_encode_api import EncodeSession
 from class163.origin_file import OriginFile
 from class163.music import artist_join
