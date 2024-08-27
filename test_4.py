@@ -1,13 +1,16 @@
-"""
 from class163.music import Music
 from pprint import pprint
-pprint(Music("https://music.163.com/song?id=1486506463&uct2=U2FsdGVkX19PImPHgQ0/67dW7Hj62Hj3yxx/OEBK8pA=").get_detail())
 
+m = Music("https://music.163.com/song?id=1486506463&uct2=U2FsdGVk")
+m.encode_session.set_cookies({"MUSIC_U": ""})
+pprint(m.get(mode="dlf", level="lossless"))
+    
+"""
 from class163.playlist import Playlist
 from pprint import pprint
 pprint(Playlist(12323740535).get_detail())
 """
-
+"""
 from class163.search import Search
 import json
 
@@ -17,3 +20,4 @@ with open("test.json", "w", encoding="UTF-8") as f:
         Search(key="明透", search_type="song", cookie_dict={"MUSIC_U": U}).get(),
         fp=f, ensure_ascii=False
     )
+"""
