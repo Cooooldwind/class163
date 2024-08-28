@@ -1,6 +1,6 @@
 """
 class163/playlist.py
-Version: 0.5.2
+Version: 0.6.2
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -37,9 +37,10 @@ class Playlist(BasicPlaylistType):
         result = self.extract_detail(origin=origin)
         if each_music:
             for index in range(len(self.track)):
-                appending_music = Music(self.track[index].id)
-                appending_music.get_detail(session)
-                self.track[index] = appending_music
+                if self.track[index].title == None:
+                    appending_music = Music(self.track[index].id)
+                    appending_music.get_detail(session)
+                    self.track[index] = appending_music
         result = self.info_dict()
         return result
 
