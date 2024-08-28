@@ -1,6 +1,6 @@
 """
 class163/common.py
-Version: 0.5.2
+Version: 0.6.4
 Author: CooooldWind_/马建仓AI助手@Gitee/豆包@字节跳动
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -26,6 +26,7 @@ class BasicMusicType:
 
     def info_dict(self) -> Optional[Dict]:
         result = {
+            "id": self.id,
             "title": self.title,
             "subtitle": self.subtitle,
             "artist": self.artist,
