@@ -1,6 +1,6 @@
 """
 class163/playlist.py
-Version: 0.6.2
+Version: 0.6.3
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -66,7 +66,7 @@ class Playlist(BasicPlaylistType):
         )
         self.last_update_time = list(last_update_time[0:5])
         self.description = extract(origin, description_keys, str)
-        self.track_count = extract(origin, track_count_keys, str)
+        self.track_count = extract(origin, track_count_keys, int)
         track_id_list = extract_in_list(
             extract(origin, track_id_list_keys, list), track_id_keys, int
         )
