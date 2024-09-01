@@ -1,19 +1,51 @@
 """
 class163/music.py
-Version: 0.6.1
+Version: 0.6.6
 Author: CooooldWind_/豆包@字节跳动
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
 """
 
 import time
-from netease_encode_api import EncodeSession
 from urllib.parse import urlparse, parse_qs
-from class163.global_args import *
+from typing import Optional, Dict, List, Union, Type
 from requests import Session
 from requests.cookies import cookiejar_from_dict
-from class163.common import BasicMusicType, extract, extract_in_list
-from typing import Optional, Dict, List, Union, Type
+from netease_encode_api import EncodeSession
+from class163.origin_file import OriginFile
+from class163.common import extract, extract_in_list
+from class163.global_args import *
+
+
+class BasicMusicType:
+    """
+    基础音乐类型处理类，提供从数据结构中提取信息的功能。
+    """
+
+    def __init__(self):
+        self.id = None
+        self.title = None
+        self.subtitle = None
+        self.artist = []
+        self.album = None
+        self.trans_title = None
+        self.trans_artist = []
+        self.trans_album = None
+        self.publish_time = []
+
+    def info_dict(self) -> Optional[Dict]:
+        result = {
+            "id": self.id,
+            "title": self.title,
+            "subtitle": self.subtitle,
+            "artist": self.artist,
+            "album": self.album,
+            "trans_title": self.trans_title,
+            "trans_artist": self.trans_artist,
+            "trans_album": self.trans_album,
+            "publish_time": self.publish_time,
+        }
+        return result
 
 
 class Music(BasicMusicType):
@@ -50,6 +82,23 @@ class Music(BasicMusicType):
         self.file_md5 = None
         self.file_size = None
         self.file_url = None
+        self.music_file: OriginFile = None
+
+    def encode_data_update(self) -> None:
+        self.__detail_encode_data = {
+            "c": str([{"id": self.id}]),
+        }
+        self.__lyric_encode_data = {
+            "id": self.id,
+            "lv": -1,
+            "tv": -1,
+        }
+        self.__file_encode_data = {
+            "ids": str([self.id]),
+            "level": None,
+            "encodeType": None,
+        }
+        return None
 
     def get(
         self,
@@ -99,6 +148,7 @@ class Music(BasicMusicType):
                     size_keys=size_keys,
                 )
             )
+            self.music_file = OriginFile(result["file_url"])
         return result
 
     def get_file(

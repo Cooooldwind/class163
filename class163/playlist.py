@@ -1,6 +1,6 @@
 """
 class163/playlist.py
-Version: 0.6.3
+Version: 0.6.6
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -8,12 +8,35 @@ Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
 
 import time
 from netease_encode_api import EncodeSession
-from class163.music import Music
+from class163.music import BasicMusicType, Music
 from urllib.parse import urlparse, parse_qs
 from class163.global_args import *
-from class163.common import BasicPlaylistType, extract, extract_in_list
+from class163.common import extract, extract_in_list
 from typing import Optional, Dict, List, Union, Type
 
+
+class BasicPlaylistType:
+    def __init__(self):
+        self.title = None
+        self.creator = None
+        self.create_time = None
+        self.last_update_time = None
+        self.description = None
+        self.track_count = None
+        self.track: List[Union[Music, BasicMusicType, None]] = []
+
+    def info_dict(self) -> Optional[Dict]:
+        track_result = [basic_music.info_dict() for basic_music in self.track]
+        result = {
+            "title": self.title,
+            "creator": self.creator,
+            "create_time": self.create_time,
+            "last_update_time": self.last_update_time,
+            "description": self.description,
+            "track_count": self.track_count,
+            "track_info": track_result,
+        }
+        return result
 
 class Playlist(BasicPlaylistType):
     def __init__(self, id: int | str) -> None:

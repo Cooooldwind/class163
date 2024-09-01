@@ -1,11 +1,11 @@
-from class163.music import Music
+from class163 import Playlist
 from pprint import pprint
-
+"""
 m = Music("https://music.163.com/song?id=1486506463&uct2=U2FsdGVk")
 m.encode_session.set_cookies({"MUSIC_U": ""})
 pprint(m.get(mode="dlf", level="lossless"))
     
-"""
+
 from class163.playlist import Playlist
 from pprint import pprint
 pprint(Playlist(12323740535).get_detail())
@@ -21,3 +21,4 @@ with open("test.json", "w", encoding="UTF-8") as f:
         fp=f, ensure_ascii=False
     )
 """
+
