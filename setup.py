@@ -28,13 +28,14 @@ setup(
         "Programming Language :: Python :: 3.12",
     ],
     name="class163",
-    version="0.6.6",
+    version="0.6.7",
     description="",
     author="CooooldWind_",
     url="https://gitee.com/CooooldWind/class163",
     packages=find_packages(),
     install_requires=[
         "netease_encode_api",
+        "typing_extensions",
     ],
     entry_points={},
 )

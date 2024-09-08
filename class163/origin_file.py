@@ -1,6 +1,6 @@
 """
 class163/orifin_file.py
-Version: 0.5.0
+Version: 0.6.7
 Author: CooooldWind_/ChatGPT
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -69,7 +69,7 @@ class OriginFile(threading.Thread):
         message = error_messages.get(status_code, f"HTTP 错误：{status_code}")
         raise RuntimeError(message)
 
-    def get_data(self):
+    def get_data(self) -> bytes:
         with self.lock:
             return self.data
 

@@ -13,7 +13,7 @@ from requests import Session
 from requests.cookies import cookiejar_from_dict
 from netease_encode_api import EncodeSession
 from class163.origin_file import OriginFile
-from class163.common import extract, extract_in_list
+from class163.common import extract, extract_in_list, error_handler, artist_join
 from class163.global_args import *
 
 
@@ -32,20 +32,6 @@ class BasicMusicType:
         self.trans_artist = []
         self.trans_album = None
         self.publish_time = []
-
-    def info_dict(self) -> Optional[Dict]:
-        result = {
-            "id": self.id,
-            "title": self.title,
-            "subtitle": self.subtitle,
-            "artist": self.artist,
-            "album": self.album,
-            "trans_title": self.trans_title,
-            "trans_artist": self.trans_artist,
-            "trans_album": self.trans_album,
-            "publish_time": self.publish_time,
-        }
-        return result
 
 
 class Music(BasicMusicType):
@@ -83,7 +69,28 @@ class Music(BasicMusicType):
         self.file_size = None
         self.file_url = None
         self.music_file: OriginFile = None
+        self.cover_file_url = None
+        self.cover_file: OriginFile = None
 
+    def info_dict(self) -> Optional[Dict]:
+        result = {}
+        for key, value in vars(self).items():
+            if key not in [
+                "_Music__detail_encode_data",
+                "_Music__lyric_encode_data",
+                "_Music__file_encode_data",
+                "lyric_info_raw",
+                "detail_info_raw",
+                "file_info_raw",
+                "cover_file",
+                "music_file",
+                "encode_session",
+            ]:
+                result[key] = value
+
+        return result
+
+    @error_handler
     def encode_data_update(self) -> None:
         self.__detail_encode_data = {
             "c": str([{"id": self.id}]),
@@ -100,6 +107,7 @@ class Music(BasicMusicType):
         }
         return None
 
+    @error_handler
     def get(
         self,
         mode: MODE = "d",
@@ -148,9 +156,9 @@ class Music(BasicMusicType):
                     size_keys=size_keys,
                 )
             )
-            self.music_file = OriginFile(result["file_url"])
         return result
 
+    @error_handler
     def get_file(
         self,
         url_keys: List[Union[str, int]],
@@ -193,6 +201,7 @@ class Music(BasicMusicType):
                 kwargs=kwargs,
             )
 
+    @error_handler
     def __get_file_third_party(
         self,
         method: str,
@@ -222,6 +231,7 @@ class Music(BasicMusicType):
         result = self.extract_file(response, url_keys, md5_keys, size_keys)
         return result
 
+    @error_handler
     def __get_file_offical(
         self, encode_session: EncodeSession = None, level: LEVEL = "standard"
     ) -> Optional[Dict]:
@@ -245,6 +255,7 @@ class Music(BasicMusicType):
         result = self.extract_file(self.file_info_raw)
         return result
 
+    @error_handler
     def extract_file(
         self,
         origin: Dict,
@@ -255,6 +266,7 @@ class Music(BasicMusicType):
         self.file_url = str(extract(origin, url_keys, str))
         if self.file_url.find("?authSecret") != -1:
             self.file_url = self.file_url[: self.file_url.find("?authSecret")]
+        self.music_file = OriginFile(self.file_url)
         self.file_md5 = extract(origin, md5_keys, str)
         self.file_size = extract(origin, size_keys, int)
         result = {
@@ -264,6 +276,7 @@ class Music(BasicMusicType):
         }
         return result
 
+    @error_handler
     def get_detail(
         self,
         encode_session: EncodeSession = None,
@@ -283,6 +296,7 @@ class Music(BasicMusicType):
         result = self.extract_detail(origin=origin)
         return result
 
+    @error_handler
     def extract_detail(
         self,
         origin: Dict,
@@ -296,6 +310,7 @@ class Music(BasicMusicType):
         artist_keys: List[Union[str, int]] = ["name"],
         trans_artist_keys: List[Union[str, int]] = ["tns"],
         publish_time_keys: List[Union[str, int]] = ["publishTime"],
+        cover_file_keys: List[Union[str, int]] = ["al", "picUrl"],
     ) -> Optional[Dict]:
         """
         从原始的详细信息中提取所需信息。
@@ -321,12 +336,18 @@ class Music(BasicMusicType):
         artists = extract(origin, artist_list_keys, list)
         self.artist = extract_in_list(artists, artist_keys, str)
         self.trans_artist = extract_in_list(artists, trans_artist_keys, str)
-        publish_time = time.localtime(
-            int(extract(origin, publish_time_keys, int)) / 1000
+        self.cover_file_url = extract(origin, cover_file_keys, str)
+        self.cover_file = OriginFile(self.cover_file_url)
+        publish_time_extract = extract(origin, publish_time_keys, int)
+        publish_time = (
+            time.localtime(int(publish_time_extract) / 1000)
+            if publish_time_extract is not None
+            else None
         )
         self.publish_time = list(publish_time[0:3])
         return self.info_dict()
 
+    @error_handler
     def get_lyric(self, encode_session: EncodeSession = None) -> Optional[Dict]:
         """
         获取音乐歌词信息。
@@ -343,6 +364,7 @@ class Music(BasicMusicType):
         result = self.extract_lyric(origin)
         return result
 
+    @error_handler
     def extract_lyric(
         self,
         origin: Dict,
@@ -363,8 +385,11 @@ class Music(BasicMusicType):
         self.lyric = extract(origin, lyric_keys, str)
         self.trans_lyric = extract(origin, trans_lyric_keys, str)
         self.trans_lyric_uploader = extract(origin, trans_lyric_uploader_keys, str)
-        lyric_update_time = time.localtime(
-            int(extract(origin, lyric_update_time_keys, int)) / 1000
+        lyric_update_time_extract = extract(origin, lyric_update_time_keys, int)
+        lyric_update_time = (
+            time.localtime(int(lyric_update_time_extract) / 1000)
+            if lyric_update_time_extract is not None
+            else None
         )
         self.lyric_update_time = list(lyric_update_time[0:5])
         result = {
@@ -392,17 +417,3 @@ def url_to_id(url: str) -> str:
             raise ValueError("URL 中未找到 'id' 参数")
     except (ValueError, TypeError) as e:
         raise e
-
-
-def artist_join(artist: list[str], separator: str = ", ") -> str:
-    """
-    将歌手列表连接为一个字符串。
-    :param artist: 歌手列表。
-    :param separator: 分隔符，默认为", "。
-    :return: 连接后的字符串。
-    """
-    artist_str = ""
-    for i in artist[:-1]:
-        artist_str += i + separator
-    artist_str += artist[-1]
-    return artist_str

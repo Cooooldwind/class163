@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.6.0
+Version: 0.6.7
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -32,4 +32,5 @@ MODE: TypeAlias = Literal[
     "dfl",
     "dlf",
 ]
+MUSIC_FILE_TYPE: TypeAlias = Literal["mp3", "flac"]
 SEARCH_TYPE: TypeAlias = Literal["song", "artist", "playlist", "album"]
