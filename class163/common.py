@@ -1,6 +1,6 @@
 """
 class163/common.py
-Version: 0.6.7
+Version: 0.6.9
 Author: CooooldWind_/马建仓AI助手@Gitee/豆包@字节跳动
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -99,3 +99,16 @@ def cover_write_mp3(file: bytes, cover: bytes) -> bytes:
     )
     id3_file_obj.save(file_obj, v2_version=3)
     return file_obj.getvalue()
+
+def clean(filename: str) -> str:
+    """
+    清空有悖于标准的字符的函数。
+    ----------
+    参数：
+    1. `filename`: 文件名
+    """
+    filename_return = filename
+    dirty = [":", "*", '"', "?", "|", "<", ">", "/", "\\"]
+    for i in dirty:
+        filename_return = filename_return.replace(i, "_")
+    return filename_return
