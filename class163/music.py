@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.6.6
+Version: 0.6.8
 Author: CooooldWind_/豆包@字节跳动
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -339,12 +339,9 @@ class Music(BasicMusicType):
         self.cover_file_url = extract(origin, cover_file_keys, str)
         self.cover_file = OriginFile(self.cover_file_url)
         publish_time_extract = extract(origin, publish_time_keys, int)
-        publish_time = (
-            time.localtime(int(publish_time_extract) / 1000)
-            if publish_time_extract is not None
-            else None
-        )
-        self.publish_time = list(publish_time[0:3])
+        if publish_time_extract is not None:
+            publish_time = time.localtime(int(publish_time_extract) / 1000)
+            self.publish_time = list(publish_time[0:3])
         return self.info_dict()
 
     @error_handler
@@ -386,12 +383,9 @@ class Music(BasicMusicType):
         self.trans_lyric = extract(origin, trans_lyric_keys, str)
         self.trans_lyric_uploader = extract(origin, trans_lyric_uploader_keys, str)
         lyric_update_time_extract = extract(origin, lyric_update_time_keys, int)
-        lyric_update_time = (
-            time.localtime(int(lyric_update_time_extract) / 1000)
-            if lyric_update_time_extract is not None
-            else None
-        )
-        self.lyric_update_time = list(lyric_update_time[0:5])
+        if lyric_update_time_extract is not None:
+            lyric_update_time = time.localtime(int(lyric_update_time_extract) / 1000)
+            self.lyric_update_time = list(lyric_update_time[0:5])
         result = {
             "lyric": self.lyric,
             "trans_lyric": self.trans_lyric,
