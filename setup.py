@@ -1,8 +1,4 @@
 from setuptools import setup, find_packages
-
-with open("news_description.md", "r", encoding="UTF-8") as f:
-    ld = f.read()
-
 setup(
     classifiers=[
         # 发展时期
@@ -29,18 +25,20 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        # 目前仅支持 Windows 因为其他平台没测试
+        "Operating System :: Microsoft :: Windows",
     ],
     name="class163",
-    version="0.7.1",
+    version="0.7.1.7",
     description="网易云音乐部分常用开放信息类API调用和部分需要用户凭证的API调用，包括音乐、歌单、搜索结果的获取，以及音乐的获取及信息写入。",
-    long_description=ld,
-    long_description_content_type="text/markdown",
     author="CooooldWind_",
     url="https://gitee.com/CooooldWind/class163",
     packages=find_packages(),
     install_requires=[
         "netease_encode_api",
         "typing_extensions",
+        "mutagen",
+        "pillow",
     ],
     entry_points={},
 )
