@@ -1,6 +1,6 @@
 """
 class163/playlist.py
-Version: 0.6.6
+Version: 0.7.0
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -70,6 +70,7 @@ class Playlist(BasicPlaylistType):
     def extract_detail(
         self,
         origin: Dict,
+        id_keys: List[Union[str, int]] = ["id"],
         title_keys: List[Union[str, int]] = ["name"],
         creator_keys: List[Union[str, int]] = ["creator", "nickname"],
         create_time_keys: List[Union[str, int]] = ["createTime"],
@@ -80,28 +81,38 @@ class Playlist(BasicPlaylistType):
         track_id_keys: List[Union[str, int]] = ["id"],
         track_list_keys: List[Union[str, int]] = ["tracks"],
     ) -> Optional[Dict]:
+        self.id = extract(origin, id_keys, int)
         self.title = extract(origin, title_keys, str)
         self.creator = extract(origin, creator_keys, str)
-        create_time = time.localtime(int(extract(origin, create_time_keys, int)) / 1000)
-        self.create_time = list(create_time[0:5])
-        last_update_time = time.localtime(
-            int(extract(origin, last_update_time_keys, int)) / 1000
-        )
-        self.last_update_time = list(last_update_time[0:5])
+        create_time_extract = extract(origin, create_time_keys, int)
+        if create_time_extract is not None:
+            create_time = time.localtime(int(create_time_extract) / 1000)
+            self.create_time = list(create_time[0:5])
+        last_update_time_extract = extract(origin, last_update_time_keys, int)
+        if last_update_time_extract is not None:
+            last_update_time = time.localtime(int(last_update_time_extract) / 1000)
+            self.last_update_time = list(last_update_time[0:5])
         self.description = extract(origin, description_keys, str)
         self.track_count = extract(origin, track_count_keys, int)
-        track_id_list = extract_in_list(
-            extract(origin, track_id_list_keys, list), track_id_keys, int
-        )
-        for id in track_id_list:
-            self.track.append(Music(id))
-        track_list = extract(origin, track_list_keys, list)
-        for index in range(len(track_list)):
-            appending_music = Music(0)
-            appending_music.detail_info_raw = track_list[index]
-            appending_music.extract_detail(origin=appending_music.detail_info_raw)
-            self.track[index] = appending_music
+        try:
+            track_id_list = extract_in_list(
+                extract(origin, track_id_list_keys, list), track_id_keys, int
+            )
+            for id in track_id_list:
+                self.track.append(Music(id))
+            track_list = extract(origin, track_list_keys, list)
+            for index in range(len(track_list)):
+                appending_music = Music(0)
+                appending_music.detail_info_raw = track_list[index]
+                appending_music.extract_detail(origin=appending_music.detail_info_raw)
+                self.track[index] = appending_music
+        except: pass
         return self.info_dict()
+    
+    def update_encode_data(self) -> None:
+        self.__encode_data = {
+            "id": self.id,
+        }
 
 
 def url_to_id(url: str) -> int:
@@ -119,3 +130,11 @@ def url_to_id(url: str) -> int:
         return playlist_id
     except (IndexError, ValueError, TypeError):
         raise ValueError("URL 中未找到 'id' 参数")
+
+
+def playlist_from_detail(detail_dict: Dict) -> Playlist:
+    result = Playlist(0)
+    result.info_raw = detail_dict
+    result.extract_detail(detail_dict)
+    result.update_encode_data()
+    return result

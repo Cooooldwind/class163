@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.6.8
+Version: 0.7.0
 Author: CooooldWind_/豆包@字节跳动
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -91,7 +91,7 @@ class Music(BasicMusicType):
         return result
 
     @error_handler
-    def encode_data_update(self) -> None:
+    def update_encode_data(self) -> None:
         self.__detail_encode_data = {
             "c": str([{"id": self.id}]),
         }
@@ -411,3 +411,10 @@ def url_to_id(url: str) -> str:
             raise ValueError("URL 中未找到 'id' 参数")
     except (ValueError, TypeError) as e:
         raise e
+
+def music_from_detail(detail_dict: Dict) -> Music:
+    result = Music(0)
+    result.detail_info_raw = detail_dict
+    result.extract_detail(detail_dict)
+    result.update_encode_data()
+    return result
