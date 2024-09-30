@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.7.0
+Version: 0.7.2
 Author: CooooldWind_/豆包@字节跳动
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -120,7 +120,7 @@ class Music(BasicMusicType):
         url_keys: List[Union[str, int]] = [],
         md5_keys: List[Union[str, int]] = [],
         size_keys: List[Union[str, int]] = [],
-        **kwargs
+        **kwargs,
     ) -> Optional[Dict]:
         """
         获取音乐信息。
@@ -170,7 +170,7 @@ class Music(BasicMusicType):
         encode_session: EncodeSession = None,
         cookies: Dict = None,
         method: str = "get",
-        **kwargs
+        **kwargs,
     ) -> Optional[Dict]:
         """
         获取音乐文件信息
@@ -210,7 +210,7 @@ class Music(BasicMusicType):
         url_keys: List[Union[str, int]],
         md5_keys: List[Union[str, int]],
         size_keys: List[Union[str, int]],
-        **kwargs
+        **kwargs,
     ) -> Optional[Dict]:
         """
         从第三方获取文件信息
@@ -345,6 +345,19 @@ class Music(BasicMusicType):
         return self.info_dict()
 
     @error_handler
+    def set_cover_size(self, size: int = -1) -> Optional[str]:
+        if self.cover_file_url != None:
+            if size > 0:
+                self.cover_file_url = f"{self.cover_file_url}?param={size}y{size}"
+            elif self.cover_file_url.find("?param") > 0:
+                tmp = int(self.cover_file_url.find("?param"))
+                self.cover_file_url = self.cover_file_url[:tmp]
+            else:
+                return None
+        self.cover_file = OriginFile(self.cover_file_url)
+        return self.cover_file_url
+
+    @error_handler
     def get_lyric(self, encode_session: EncodeSession = None) -> Optional[Dict]:
         """
         获取音乐歌词信息。
@@ -411,6 +424,7 @@ def url_to_id(url: str) -> str:
             raise ValueError("URL 中未找到 'id' 参数")
     except (ValueError, TypeError) as e:
         raise e
+
 
 def music_from_detail(detail_dict: Dict) -> Music:
     result = Music(0)
