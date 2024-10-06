@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.7.0
+Version: 0.7.3
 Author: CooooldWind_/豆包@字节跳动
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -16,7 +16,7 @@ from typing import Optional, Dict, List, Union
 
 class Search:
     def __init__(
-        self, key: str, cookie_dict: Optional[Dict], search_type: SEARCH_TYPE = "song", encode_session: Optional[EncodeSession] = None
+        self, key: str, cookie_dict: Optional[Dict] = None, search_type: SEARCH_TYPE = "song", encode_session: Optional[EncodeSession] = None
     ):
         if encode_session != None:
             self.encode_session = encode_session

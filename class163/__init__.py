@@ -12,4 +12,4 @@ from class163.origin_file import OriginFile
 from class163.search import Search
 from class163.common import *
 
-__VERSION__ = "0.7.2"
+__VERSION__ = "0.7.3"
