@@ -1,6 +1,6 @@
 """
 class163/playlist.py
-Version: 0.7.0
+Version: 0.7.5
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -49,21 +49,39 @@ class Playlist(BasicPlaylistType):
             "id": self.id,
         }
 
-    def get_detail(self, each_music: bool = True, session: EncodeSession = None) -> Optional[Dict]:
-        if session == None:
-            session = self.encode_session
-        self.info_raw = session.get_response(
+    def get_detail(self, each_music: bool = True, encode_session: EncodeSession = None) -> Optional[Dict]:
+        if encode_session == None:
+            encode_session = self.encode_session
+        self.info_raw = encode_session.get_response(
             url="https://music.163.com/weapi/v6/playlist/detail",
             encode_data=self.__encode_data,
         )["playlist"]
         origin = self.info_raw
         result = self.extract_detail(origin=origin)
         if each_music:
+            get_detail_list = []
+            get_detail_index_list: list[int] = []
             for index in range(len(self.track)):
+                self.track[index].update_encode_data()
                 if self.track[index].title == None:
-                    appending_music = Music(self.track[index].id)
-                    appending_music.get_detail(session)
-                    self.track[index] = appending_music
+                    get_detail_list.append({"id":self.track[index].id})
+                    get_detail_index_list.append(index)
+                if len(get_detail_list) >= 30:
+                    detail_encode_data = {
+                        "c": str(get_detail_list),
+                    }
+                    detail_info_raw = encode_session.get_response(
+                        url=DETAIL_URL,
+                        encode_data=detail_encode_data,
+                    )["songs"]
+                    for now in range(len(get_detail_index_list)):
+                        self.track[get_detail_index_list[now]].detail_info_raw = detail_info_raw[now]
+                        self.track[get_detail_index_list[now]].extract_detail(origin=detail_info_raw[now])
+                        self.track[get_detail_index_list[now]].update_encode_data()
+                    get_detail_list.clear()
+                    get_detail_index_list.clear()
+
+                    
         result = self.info_dict()
         return result
 

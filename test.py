@@ -1,3 +1,4 @@
+"""
 import time
 from tqdm import tqdm
 from class163.playlist_old import Playlist
@@ -5,6 +6,10 @@ from netease_encode_api import EncodeSession
 from class163.origin_file import OriginFile
 from class163.music import artist_join
 import qt_test
+"""
+from class163 import Playlist
+p=Playlist("9097772489")
+p.get_detail()
 
 """
 driver = webdriver.ChromiumEdge()
@@ -18,6 +23,8 @@ while True:
         break
     else:
         time.sleep(0.5)
+"""
+
 """
 s = EncodeSession()
 c = qt_test.login()
@@ -39,3 +46,4 @@ for m in p.track[0:5]:
         f.write(of.data)
     with open(f"{m.title} - {artist_join(m.artist)}.lrc", "w+", encoding="UTF-8") as f:
         f.write(m.lyric)
+"""
