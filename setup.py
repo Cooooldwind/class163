@@ -27,7 +27,7 @@ setup(
         "Programming Language :: Python :: 3.12",
     ],
     name="class163",
-    version="0.7.5",
+    version="0.7.6",
     description="网易云音乐部分常用开放信息类API调用和部分需要用户凭证的API调用，包括音乐、歌单、搜索结果的获取，以及音乐的获取及信息写入。",
     author="CooooldWind_",
     url="https://gitee.com/CooooldWind/class163",

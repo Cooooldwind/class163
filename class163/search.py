@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.7.3
+Version: 0.7.6
 Author: CooooldWind_/豆包@字节跳动
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -16,7 +16,11 @@ from typing import Optional, Dict, List, Union
 
 class Search:
     def __init__(
-        self, key: str, cookie_dict: Optional[Dict] = None, search_type: SEARCH_TYPE = "song", encode_session: Optional[EncodeSession] = None
+        self,
+        key: str,
+        cookie_dict: Optional[Dict] = None,
+        search_type: SEARCH_TYPE = "song",
+        encode_session: Optional[EncodeSession] = None,
     ):
         if encode_session != None:
             self.encode_session = encode_session
@@ -36,20 +40,19 @@ class Search:
             encode_type = "100"
         elif self.search_type == "playlist":
             encode_type = "1000"
-        self.offset = 0
         self.result_count = 0
         self.__encode_data = {
             "s": key,
             "type": encode_type,  # 歌曲-1 专辑-10 歌手-100 歌单-1000
-            "offset": str(self.offset),
+            "offset": "0",
             "total": "true",
-            "limit": "30",
+            "limit": "65536",
         }
         self.search_result_raw = {}
         self.search_result_sorted: list[Union[Music, Playlist, None]] = []
 
     def get(
-        self, encode_session: EncodeSession = None, end_index: int = 9999999
+        self, encode_session: EncodeSession = None
     ) -> Union[List, Dict, None]:
         if encode_session is None:
             encode_session = self.encode_session
@@ -62,22 +65,6 @@ class Search:
         )["result"]
         self.result_count = extract(origin, [f"{self.search_type}Count"], int)
         self.search_result_raw = origin
-        # 把其他搜索结果加进去
-        while True:
-            self.offset += 30
-            if self.offset >= min(self.result_count, end_index):
-                break
-            self.__encode_data["offset"] = str(self.offset)
-            self.__encode_data["total"] = "false"
-            origin = encode_session.get_response(
-                url=SEARCH_URL, encode_data=self.__encode_data
-            )["result"]
-            self.search_result_raw[f"{self.search_type}s"] += extract(
-                origin, [f"{self.search_type}s"], list
-            )
-        self.search_result_raw[f"{self.search_type}s"] = self.search_result_raw[
-            f"{self.search_type}s"
-        ][0 : min(self.result_count, end_index)]
         # 如果有歌曲就加进去
         if self.search_type == "song":
             for i in self.search_result_raw["songs"]:

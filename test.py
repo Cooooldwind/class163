@@ -8,7 +8,7 @@ from class163.music import artist_join
 import qt_test
 """
 from class163 import Playlist
-p=Playlist("9097772489")
+p=Playlist("https://music.163.com/playlist?id=12324368073&uct2=U2FsdGVkX1/js0pLpBErnZHXMMEI7T6O8Kl+3Z+Myjw=")
 p.get_detail()
 
 """
