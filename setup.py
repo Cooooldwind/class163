@@ -20,14 +20,15 @@ setup(
         # 许可证信息
         "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
         # 目标 Python 版本
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+	    "Programming Language :: Python :: 3.13",
+	    "Programming Language :: Python :: 3.14",
     ],
     name="class163",
-    version="0.7.6",
+    version="0.7.7.1",
     description="网易云音乐部分常用开放信息类API调用和部分需要用户凭证的API调用，包括音乐、歌单、搜索结果的获取，以及音乐的获取及信息写入。",
     author="CooooldWind_",
     url="https://gitee.com/CooooldWind/class163",
