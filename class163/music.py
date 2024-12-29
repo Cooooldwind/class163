@@ -1,6 +1,6 @@
 """
 class163/music.py
-Version: 0.7.2
+Version: 0.7.7
 Author: CooooldWind_/豆包@字节跳动
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -161,9 +161,9 @@ class Music(BasicMusicType):
     @error_handler
     def get_file(
         self,
-        url_keys: List[Union[str, int]],
-        md5_keys: List[Union[str, int]],
-        size_keys: List[Union[str, int]],
+        url_keys: List[Union[str, int]] = ["url"],
+        md5_keys: List[Union[str, int]] = ["md5"],
+        size_keys: List[Union[str, int]] = ["size"],
         url: str = None,
         offical: bool = True,
         level: LEVEL = "standard",
@@ -207,9 +207,9 @@ class Music(BasicMusicType):
         method: str,
         url: str,
         cookies: dict,
-        url_keys: List[Union[str, int]],
-        md5_keys: List[Union[str, int]],
-        size_keys: List[Union[str, int]],
+        url_keys: List[Union[str, int]] = ["url"],
+        md5_keys: List[Union[str, int]] = ["md5"],
+        size_keys: List[Union[str, int]] = ["size"],
         **kwargs,
     ) -> Optional[Dict]:
         """
@@ -233,7 +233,10 @@ class Music(BasicMusicType):
 
     @error_handler
     def __get_file_offical(
-        self, encode_session: EncodeSession = None, level: LEVEL = "standard"
+        self, encode_session: EncodeSession = None, level: LEVEL = "standard",
+        url_keys: List[Union[str, int]] = ["url"],
+        md5_keys: List[Union[str, int]] = ["md5"],
+        size_keys: List[Union[str, int]] = ["size"],
     ) -> Optional[Dict]:
         """
         从官方获取音乐文件信息
