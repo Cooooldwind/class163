@@ -1,6 +1,6 @@
 """
 class163/login.py
-Version: 0.7.6
+Version: 0.7.7
 Author: CooooldWind_
 E-Mail: 3091868003@qq.com
 Copyright @CooooldWind_ / Following GNU_AGPLV3+ License
@@ -15,10 +15,14 @@ class Login:
     def __init__(self) -> str:
         self.encode_session = EncodeSession()
         self.__encode_data = {"type": "1"}
-        self.unikey: str = self.encode_session.get_response(
+        self.login_link = ""
+        self.unikey = ""
+        self.__check_encode_data = {"key": self.unikey, "type": "1"}
+
+    def get_unikey(self) -> str:
+        self.unikey = self.encode_session.get_response(
             url=LOGIN_URL, encode_data=self.__encode_data
         )["unikey"]
-        self.__check_encode_data = {"key": self.unikey, "type": "1"}
         self.login_link = (
             f"https://music.163.com/login?codekey={self.unikey}&refer=scan"
         )
@@ -37,21 +41,3 @@ class Login:
             return {"status": "login", "user": origin["nickname"]}
         elif login_code == 803:
             return{"status": "succeed", "session": self.encode_session}
-
-
-
-"""
-from selenium import webdriver
-
-def login() -> dict:
-    driver = webdriver.ChromiumEdge()
-    driver.get("https://music.163.com/#/login/")
-    cookies = None
-    while cookies == None:
-        cookies = driver.get_cookie("MUSIC_U")
-        if cookies != None:
-            cookies = {cookies["name"]: cookies["value"]}
-            driver.close()
-            break
-    return cookies
-"""
